@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Stoic Sage AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Reset & Box-Sizing */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Body & Global Styles */
+        body {
+            font-family: 'Open Sans', sans-serif; /* A clear, modern sans-serif for body */
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4; /* Light grey background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container for the Chatbot */
+        .chatbot-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px; /* Max width for readability */
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header / Title */
+        h1 {
+            font-family: 'Merriweather', serif; /* A classic serif for titles */
+            color: #4a4a4a;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+
+        h2 {
+            font-family: 'Merriweather', serif;
+            color: #666;
+            font-size: 1.1em;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        /* Chat Display Area */
+        .chat-display {
+            background-color: #fcfcfc;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 150px; /* Minimum height for chat history */
+            max-height: 400px; /* Max height before scrolling */
+            overflow-y: auto; /* Enable scrolling */
+            text-align: left;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word; /* Prevents long words from breaking layout */
+        }
+
+        .user-message {
+            background-color: #e0f2f7; /* Light blue for user */
+            align-self: flex-end; /* Align to the right */
+            color: #212121;
+        }
+
+        .ai-message {
+            background-color: #e8eaf6; /* Light purple/grey for AI */
+            align-self: flex-start; /* Align to the left */
+            color: #212121;
+        }
+
+        .initial-guidance {
+            color: #607d8b; /* Muted blue for guidance */
+            font-style: italic;
+            text-align: center;
+            margin: 10px 0;
+            padding: 0 10px;
+        }
+
+        /* Chat Input Form */
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-form input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .chat-input-form button {
+            padding: 12px 20px;
+            background-color: #607d8b; /* Muted blue for action */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-input-form button:hover {
+            background-color: #455a64; /* Darker blue on hover */
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            font-size: 0.85em;
+            color: #777;
+        }
+        .footer a {
+            color: #607d8b;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <h1>The Stoic Sage AI</h1>
+        <h2>Your Guide to Wisdom and Tranquility</h2>
+
+        <div class="chat-display" id="chat-history">
+            <div class="ai-message">Greetings. How may I assist you in your pursuit of wisdom and equanimity today?</div>
+        </div>
+
+        <div class="initial-guidance">
+            Type your question below, or simply reflect upon a challenge you face.
+        </div>
+
+        <form class="chat-input-form" action="/chat" method="POST">
+            <input type="text" name="msg" id="user-input" placeholder="Ask about virtue, resilience, or control..." required>
+            <button type="submit">Reflect</button>
+        </form>
+
+        <div class="footer">
+            Inspired by the teachings of Marcus Aurelius, Epictetus, and Seneca.
+            <br>&copy; 2025 StoicMind Project.
+        </div>
+    </div>
+
+    <!-- Minimal JavaScript to update chat history dynamically (optional, but recommended for better UX) --><script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatForm = document.querySelector('.chat-input-form');
+            const chatHistory = document.getElementById('chat-history');
+            const userInput = document.getElementById('user-input');
+
+            // Function to add messages to the chat history display
+            function addMessage(sender, text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(sender + '-message');
+                // messageDiv.textContent = text;
+                messageDiv.innerHTML = text;
+                chatHistory.appendChild(messageDiv);
+                chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll to bottom
+            }
+
+            // Handle form submission using AJAX
+            chatForm.addEventListener('submit', async function(event) {
+                event.preventDefault(); // Prevent default form submission (page reload)
+
+                const userMsg = userInput.value;
+                if (!userMsg.trim()) return; // Don't send empty messages
+
+                addMessage('user', userMsg); // Add user's message to history
+                userInput.value = ''; // Clear input field
+
+                // Show a temporary "AI is thinking" message
+                const thinkingMessage = document.createElement('div');
+                thinkingMessage.classList.add('ai-message');
+                thinkingMessage.textContent = 'The Sage contemplates...';
+                thinkingMessage.id = 'thinking-message';
+                chatHistory.appendChild(thinkingMessage);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+
+                try {
+                    // Send the message to your Flask backend using fetch API
+                    const response = await fetch('/chat', { // Your Flask endpoint for processing
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `msg=${encodeURIComponent(userMsg)}`
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const aiAnswer = await response.text(); // Get plain text response
+
+                    // Remove the thinking message
+                    if (document.getElementById('thinking-message')) {
+                        document.getElementById('thinking-message').remove();
+                    }
+                    addMessage('ai', aiAnswer); // Add AI's answer to history
+
+                } catch (error) {
+                    console.error('Error fetching AI response:', error);
+                    if (document.getElementById('thinking-message')) {
+                        document.getElementById('thinking-message').remove();
+                    }
+                    addMessage('ai', 'Forgive me, an internal disturbance prevents a clear response at this moment. Please try again.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
