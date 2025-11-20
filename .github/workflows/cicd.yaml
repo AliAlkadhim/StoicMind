@@ -68,14 +68,14 @@ jobs:
 
       - name: Pull image
         env:
-          IMAGE_NAME: ${{ needs.Continuous-Integration.outputs.image }}
+          IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPO }}:${{ github.sha }
         run: |
           echo "Pulling image $IMAGE_NAME"
           docker pull $IMAGE_NAME
 
       - name: Run Docker Image to serve users
         env:
-          IMAGE_NAME: ${{ needs.Continuous-Integration.outputs.image }}
+          IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPO }}:${{ github.sha }
         run: |
           docker run -d -p 8080:8080 \
             -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
