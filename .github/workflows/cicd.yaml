@@ -54,5 +54,24 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Run Docker Image to serve users
-        run: |
-         docker run -d -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" -e AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" -e PINECONE_API_KEY="${{ secrets.PINECONE_API_KEY }}" -e GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" -p 8080:8080 "${{ steps.login-ecr.outputs.registry }}"/"${{ secrets.ECR_REPO }}":latest
+        env:
+          # Define the image name and a fixed container name for clean management
+          IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPO }}:latest
+          CONTAINER_NAME: stoic-app
+        run: |
+          # 1. Stop and remove the old container to free up port 8080
+          if docker ps -a --format '{{.Names}}' | grep -q $CONTAINER_NAME; then
+            docker stop $CONTAINER_NAME
+            docker rm $CONTAINER_NAME
+          fi
+
+          # 2. Force Pull the latest image from ECR and run it
+          # ADDED --pull always to ignore local cache
+          docker run -d --pull always -p 8080:8080 \
+            -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -e AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" \
+            -e PINECONE_API_KEY="${{ secrets.PINECONE_API_KEY }}" \
+            -e GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+            --name $CONTAINER_NAME \
+            $IMAGE_NAME
