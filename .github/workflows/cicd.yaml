@@ -35,14 +35,13 @@ jobs:
         run: |
           docker build --no-cache -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .  
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
   Continuous-Deployment:
     needs: Continuous-Integration
     runs-on: self-hosted
 
     env:
-      IMAGE_NAME: ${{ needs.Continuous-Integration.outputs.image }}
       CONTAINER_NAME: stoic-app
 
     steps:
@@ -68,11 +67,15 @@ jobs:
           fi
 
       - name: Pull image
+        env:
+          IMAGE_NAME: ${{ needs.Continuous-Integration.outputs.image }}
         run: |
           echo "Pulling image $IMAGE_NAME"
           docker pull $IMAGE_NAME
 
       - name: Run Docker Image to serve users
+        env:
+          IMAGE_NAME: ${{ needs.Continuous-Integration.outputs.image }}
         run: |
           docker run -d -p 8080:8080 \
             -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
