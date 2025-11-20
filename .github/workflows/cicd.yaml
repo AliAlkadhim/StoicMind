@@ -54,16 +54,16 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Run Docker Image to serve users
-        env:
-          # Define the image name and a fixed container name for clean management
+        env:
+         # Define the image name and a fixed container name for clean management
           IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPO }}:latest
           CONTAINER_NAME: stoic-app
-        run: |
-          # 1. Stop and remove the old container to free up port 8080
-          if docker ps -a --format '{{.Names}}' | grep -q $CONTAINER_NAME; then
-            docker stop $CONTAINER_NAME
-            docker rm $CONTAINER_NAME
-          fi
+          run: |
+            # 1. Stop and remove the old container to free up port 8080
+            if docker ps -a --format '{{.Names}}' | grep -q $CONTAINER_NAME; then
+              docker stop $CONTAINER_NAME
+              docker rm $CONTAINER_NAME
+            fi
 
           # 2. Force Pull the latest image from ECR and run it
           # ADDED --pull always to ignore local cache
