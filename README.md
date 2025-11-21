@@ -71,8 +71,8 @@ StoicMind uses a full RAG pipeline designed for efficient retrieval, high-qualit
 
 In the directory `StoicMind` make a file called `.env` and put in it the following (you need a Gemini and Pinecone API key):
 ```
-PINECONE_API_KEY="pcsk_2d8GEL_Ae3VhDhdqXG9NvPvwtXvkN2EUL6dKy3Hrrs4BGbta6PwN8HFr1xNmkobHoyqoBB"
-GEMINI_API_KEY="AIzaSyC5Qqxr1xoR-C11aEid-VEApwndu10eXsY"
+PINECONE_API_KEY="........."
+GEMINI_API_KEY=".........."
 ```
 Then do
    ```bash
