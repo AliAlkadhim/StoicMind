@@ -81,6 +81,6 @@ conda activate stoicmind
 pip install -r requirements.txt
 python app.py
 ```
-then go to http://localhost:8080 on your browser.
+then go to http://localhost:8080 on your browser.   
 
 This project was influenced by the tutorial on https://www.youtube.com/watch?v=KnoVFU0yCUc
