@@ -69,6 +69,12 @@ StoicMind uses a full RAG pipeline designed for efficient retrieval, high-qualit
 
 ## 📦 **Running Locally**
 
+In the directory `StoicMind` make a file called `.env` and put in it the following (you need a Gemini and Pinecone API key):
+```
+PINECONE_API_KEY="pcsk_2d8GEL_Ae3VhDhdqXG9NvPvwtXvkN2EUL6dKy3Hrrs4BGbta6PwN8HFr1xNmkobHoyqoBB"
+GEMINI_API_KEY="AIzaSyC5Qqxr1xoR-C11aEid-VEApwndu10eXsY"
+```
+Then do
    ```bash
 conda create -n stoicmind python=3.10
 conda activate stoicmind
