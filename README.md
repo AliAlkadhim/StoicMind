@@ -73,3 +73,5 @@ StoicMind uses a full RAG pipeline designed for efficient retrieval, high-qualit
    ```bash
    conda create -n stoicmind python=3.10
    conda activate stoicmind
+
+This project was influenced by the tutorial on https://www.youtube.com/watch?v=KnoVFU0yCUc
