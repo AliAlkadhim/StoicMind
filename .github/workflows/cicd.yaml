@@ -8,7 +8,7 @@ jobs:
   Continuous-Integration:
     runs-on: ubuntu-latest
     outputs:
-      image: ${{ steps.build-image.outputs.image }}
+      image: ${{ steps['build-image'].outputs.image }}
 
     steps:
       - name: Checkout
@@ -28,7 +28,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps['login-ecr'].outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
@@ -43,7 +43,7 @@ jobs:
 
     env:
       CONTAINER_NAME: stoic-app
-      IMAGE_NAME: ${{ needs.Continuous-Integration.outputs.image }}
+      IMAGE_NAME: ${{ needs['Continuous-Integration'].outputs.image }}
 
     steps:
       - name: Checkout
@@ -57,13 +57,12 @@ jobs:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Stop and remove old container if exists
         run: |
           set -euo pipefail
-          if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+          if [ "$(docker ps -aq -f name=^/${CONTAINER_NAME}$)" ]; then
             docker stop "$CONTAINER_NAME" || true
             docker rm "$CONTAINER_NAME" || true
           fi
@@ -71,12 +70,15 @@ jobs:
       - name: Pull image
         run: |
           set -euo pipefail
-          echo "Pulling image $IMAGE_NAME"
+          echo "IMAGE_NAME is: '$IMAGE_NAME'"
+          if [ -z "${IMAGE_NAME:-}" ]; then
+            echo "ERROR: IMAGE_NAME is empty. CI job output 'image' did not resolve."
+            exit 1
+          fi
           docker pull "$IMAGE_NAME"
 
       - name: Run Docker Image to serve users
         env:
-          # Put secrets in the *runner environment* (not on the command line)
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
