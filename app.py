@@ -15,7 +15,7 @@ from src.helper import format_newlines_to_html, format_text_to_markdown
 
 app = Flask(__name__)
 
-load_dotenv()
+load_dotenv(override=True)
 
 PINECONE_API_KEY=os.getenv("PINECONE_API_KEY")
 GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
@@ -33,7 +33,7 @@ docsearch = PineconeVectorStore.from_existing_index(
 
 retriever = docsearch.as_retriever(search_type="mmr", search_kwargs={"k":10})
 llm_gemini = ChatGoogleGenerativeAI(
-    model= "gemini-2.5-pro",  # or "gemini-1.5-pro"
+    model= "gemini-2.5-flash",  # or "gemini-1.5-pro"
     temperature=0.2,
     api_key = GEMINI_API_KEY
 )
