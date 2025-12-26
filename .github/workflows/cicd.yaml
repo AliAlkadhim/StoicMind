@@ -8,7 +8,7 @@ jobs:
   Continuous-Integration:
     runs-on: ubuntu-latest
     outputs:
-      image: ${{ steps['build-image'].outputs.image }}
+      image: ${{ steps.build-image.outputs.image }}
 
     steps:
       - name: Checkout
@@ -28,7 +28,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
-          ECR_REGISTRY: ${{ steps['login-ecr'].outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
@@ -43,7 +43,6 @@ jobs:
 
     env:
       CONTAINER_NAME: stoic-app
-      IMAGE_NAME: ${{ needs['Continuous-Integration'].outputs.image }}
 
     steps:
       - name: Checkout
@@ -57,6 +56,7 @@ jobs:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Stop and remove old container if exists
@@ -68,17 +68,17 @@ jobs:
           fi
 
       - name: Pull image
+        env:
+          IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPO }}:${{ github.sha }}
         run: |
           set -euo pipefail
-          echo "IMAGE_NAME is: '$IMAGE_NAME'"
-          if [ -z "${IMAGE_NAME:-}" ]; then
-            echo "ERROR: IMAGE_NAME is empty. CI job output 'image' did not resolve."
-            exit 1
-          fi
+          echo "Pulling image $IMAGE_NAME"
           docker pull "$IMAGE_NAME"
 
       - name: Run Docker Image to serve users
         env:
+          IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPO }}:${{ github.sha }}
+          # secrets live in the step environment (not printed on CLI)
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
