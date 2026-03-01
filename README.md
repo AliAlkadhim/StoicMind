@@ -4,7 +4,7 @@ StoicMind is an AI-powered Stoic philosophy guide built using a Retrieval-Augmen
 It provides personalized, Stoicism-informed reflections and guidance based on the works of Marcus Aurelius, Seneca, Epictetus, and other major Stoic thinkers.
 
 You can access the live application here:  
-👉 **http://3.22.97.87:8080**
+👉 **http://13.58.242.92:8080/**
 
 ---
 
